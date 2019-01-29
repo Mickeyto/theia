@@ -556,6 +556,12 @@ export class DugiteGit implements Git {
         return this.getRemotes(repositoryPath);
     }
 
+    async remoteUri(repository: Repository): Promise<string[]> {
+        await this.ready.promise;
+        const repositoryPath = this.getFsPath(repository);
+        return this.getRemoteUris(repositoryPath);
+    }
+
     async exec(repository: Repository, args: string[], options?: Git.Options.Execution): Promise<GitResult> {
         await this.ready.promise;
         const repositoryPath = this.getFsPath(repository);
@@ -700,6 +706,23 @@ export class DugiteGit implements Git {
         const result = await git(['remote'], repositoryPath, 'remote', { exec, env });
         const out = result.stdout || '';
         return out.trim().match(/\S+/g) || [];
+    }
+
+    private async getRemoteUris(repositoryPath: string): Promise<string[]> {
+        await this.ready.promise;
+        const [exec, env] = await Promise.all([this.execProvider.exec(), this.gitEnv.promise]);
+        const result = await git(['remote', '-v'], repositoryPath, 'remote', { exec, env });
+        const out = result.stdout || '';
+        const results = out.trim().match(/\S+/g);
+        if (results) {
+            const values = [];
+            for (let i = 1; i <= results.length; i += 3) {
+                values.push(results[i]);
+            }
+            return values;
+        } else {
+            return [];
+        }
     }
 
     private async getDefaultRemote(repositoryPath: string, remote?: string): Promise<string | undefined> {

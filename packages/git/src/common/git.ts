@@ -698,6 +698,13 @@ export interface Git extends Disposable {
     remote(repository: Repository): Promise<string[]>;
 
     /**
+     * It resolves to an array of configured remote uris for a given repository.
+     *
+     * @param repository the repository to get the remote uris.
+     */
+    remoteUri(repository: Repository): Promise<string[]>;
+
+    /**
      * Executes the Git command and resolves to the result. If an executed Git command exits with a code that is not in the `successExitCodes` or an error not in `expectedErrors`,
      * a `GitError` will be thrown.
      *
